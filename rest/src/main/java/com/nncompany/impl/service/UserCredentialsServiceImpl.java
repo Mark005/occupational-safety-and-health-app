@@ -22,8 +22,8 @@ public class UserCredentialsServiceImpl implements UserCredentialsService {
     private UserCredentialsStore userCredentialsStore;
 
     @Override
-    public Optional<UserCredentials> getUserCredentialsByLoginAndPass(String login, String pass) {
-        return userCredentialsStore.findByLoginAndPass(login, pass);
+    public boolean isUserExistWithCurrentLoginAndPass(String login, String pass) {
+        return userCredentialsStore.findByLoginAndPass(login, pass).isPresent();
     }
 
     @Override

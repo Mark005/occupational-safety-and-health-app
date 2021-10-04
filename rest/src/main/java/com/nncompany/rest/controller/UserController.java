@@ -18,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/rest/creds")
-public class UserServlet {
+public class UserController {
 
     @Autowired
     private UserService userService;

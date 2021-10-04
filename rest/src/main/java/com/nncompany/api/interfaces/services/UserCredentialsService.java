@@ -9,7 +9,7 @@ public interface UserCredentialsService {
 
     void save(UserCredentials userCredentials);
 
-    Optional<UserCredentials> getUserCredentialsByLoginAndPass(String login, String pass);
+    boolean isUserExistWithCurrentLoginAndPass(String login, String pass);
 
     UserCredentials getByLogin(String login);
 

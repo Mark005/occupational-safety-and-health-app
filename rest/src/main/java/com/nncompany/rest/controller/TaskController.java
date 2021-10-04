@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/rest/creds")
-public class TaskServlet {
+public class TaskController {
 
     @Autowired
     TaskService taskService;

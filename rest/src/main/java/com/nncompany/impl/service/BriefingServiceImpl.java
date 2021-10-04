@@ -4,6 +4,7 @@ import com.nncompany.api.interfaces.services.BriefingService;
 import com.nncompany.api.interfaces.store.BriefingStore;
 import com.nncompany.api.model.entities.Briefing;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,34 +20,27 @@ public class BriefingServiceImpl implements BriefingService {
     private BriefingStore briefingStore;
 
     @Override
-    public Briefing get(int id) {
+    public Briefing getById(int id) {
         return briefingStore.getById(id);
     }
 
     @Override
-    public List<Briefing> getAll() {
-        return briefingStore.findAll();
+    public Page<Briefing> getWithPagination(Integer page, Integer pageSize) {
+        return briefingStore.findAll(PageRequest.of(page, pageSize));
     }
 
     @Override
-    public List<Briefing> getWithPagination(Integer page, Integer pageSize) {
-        return briefingStore
-                .findAll(PageRequest.of(page, pageSize))
-                .getContent();
+    public Briefing save(Briefing briefing) {
+        return briefingStore.save(briefing);
     }
 
     @Override
-    public void save(Briefing briefing) {
-        briefingStore.save(briefing);
+    public Briefing update(Briefing briefing) {
+        return briefingStore.save(briefing);
     }
 
     @Override
-    public void update(Briefing briefing) {
-        briefingStore.save(briefing);
-    }
-
-    @Override
-    public void delete(Briefing briefing) {
-        briefingStore.delete(briefing);
+    public void delete(Integer id) {
+        briefingStore.deleteById(id);
     }
 }

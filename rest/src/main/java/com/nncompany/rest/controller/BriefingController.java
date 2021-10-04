@@ -8,16 +8,15 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("${app.rest.url}")
-public class BriefingServlet {
+public class BriefingController {
 
     @Autowired
     BriefingService briefingService;
@@ -31,16 +30,12 @@ public class BriefingServlet {
     @GetMapping("/briefings")
     @PreAuthorize("hasAnyAuthority('briefings:read')")
     public ResponseEntity<Object> getAllBriefings(@RequestParam Integer page,
-                                                  @RequestParam Integer pageSize){
-        List<Briefing> briefings = briefingService.getWithPagination(page, pageSize);
-        if(briefings != null) {
-            return ResponseEntity.ok(new ResponseList(briefings, briefingService.getTotalCount()));
-        } else {
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "briefings not found",
-                                                        "briefings list = null"),
-                                                        HttpStatus.NOT_FOUND);
-        }
+                                                  @RequestParam Integer pageSize) {
+        Page<Briefing> briefingsPage = briefingService.getWithPagination(page, pageSize);
+        return ResponseEntity.ok(
+                new ResponseList(
+                        briefingsPage.getContent(),
+                        briefingsPage.getTotalElements()));
     }
 
     @ApiOperation(value = "Get briefing by id")
@@ -50,15 +45,8 @@ public class BriefingServlet {
             @ApiResponse(code = 404, message = "Can't find briefing", response = RequestError.class)
     })
     @GetMapping("/briefings/{id}")
-    public ResponseEntity<Object> getBriefingById(@PathVariable Integer id){
-        Briefing briefing = briefingService.get(id);
-        if(briefing == null) {
-            return new ResponseEntity<>(new RequestError(404,
-                    "briefing not found",
-                    "briefing deleted or not created"),
-                    HttpStatus.NOT_FOUND);
-        }
-        return ResponseEntity.ok(briefing);
+    public ResponseEntity<Object> getBriefingById(@PathVariable Integer id) {
+        return ResponseEntity.ok(briefingService.getById(id));
     }
 
     @ApiOperation(value = "Add new briefing (Attention: only admin can add new briefings)")
@@ -68,9 +56,8 @@ public class BriefingServlet {
             @ApiResponse(code = 403, message = "Hasn't access, relogin as admin", response = RequestError.class)
     })
     @PostMapping("/briefings")
-    public ResponseEntity<Object> addBriefing(@RequestBody Briefing briefing){
-        briefingService.save(briefing);
-        return new ResponseEntity<>(briefing, HttpStatus.CREATED);
+    public ResponseEntity<Object> addBriefing(@RequestBody Briefing briefing) {
+        return new ResponseEntity<>(briefingService.save(briefing), HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Update briefing by id")
@@ -81,17 +68,10 @@ public class BriefingServlet {
             @ApiResponse(code = 404, message = "Briefing with current id is not found", response = RequestError.class)
     })
     @PutMapping("/briefings/{id}")
-    public ResponseEntity updateBriefing(@PathVariable Integer id,
-                                         @RequestBody Briefing briefing){
-        if(briefingService.get(id) == null) {
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "briefings not found",
-                                                        "briefing with current id is not found"),
-                                                        HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<Object> updateBriefing(@PathVariable Integer id,
+                                         @RequestBody Briefing briefing) {
         briefing.setId(id);
-        briefingService.update(briefing);
-        return new ResponseEntity<>(briefing, HttpStatus.OK);
+        return new ResponseEntity<>(briefingService.update(briefing), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Deleter briefing by id")
@@ -102,15 +82,8 @@ public class BriefingServlet {
             @ApiResponse(code = 404, message = "Briefing with current id is not found", response = RequestError.class)
     })
     @DeleteMapping("/briefings/{id}")
-    public ResponseEntity deleteBriefing(@PathVariable Integer id){
-        Briefing briefing = briefingService.get(id);
-        if(briefing == null) {
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "briefings not found",
-                                                        "briefing with current id is not found"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-        briefingService.delete(briefing);
+    public ResponseEntity<Object> deleteBriefing(@PathVariable Integer id) {
+        briefingService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

@@ -18,7 +18,7 @@ import java.util.Date;
 
 @RestController
 @RequestMapping("/api/rest/creds")
-public class ChatServlet {
+public class ChatController {
 
     @Autowired
     MessageService messageService;

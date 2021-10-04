@@ -6,7 +6,6 @@ import com.nncompany.api.interfaces.services.UserService;
 import com.nncompany.api.model.entities.Briefing;
 import com.nncompany.api.model.entities.User;
 import com.nncompany.api.model.entities.UserBriefing;
-import com.nncompany.api.model.enums.Direction;
 import com.nncompany.api.model.enums.UserBriefingSort;
 import com.nncompany.api.model.wrappers.RequestError;
 import com.nncompany.api.model.wrappers.ResponseList;
@@ -21,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/rest/creds/user-briefing")
-public class UserBriefingServlet {
+public class UserBriefingController {
 
     @Autowired
     UserBriefingService userBriefingService;
@@ -58,7 +57,7 @@ public class UserBriefingServlet {
     })
     @GetMapping("/conducted-by-briefing/{id}")
     public ResponseEntity<Object> getUsersByCurrentBriefing(@PathVariable Integer id) {
-        Briefing briefing = briefingService.get(id);
+        Briefing briefing = briefingService.getById(id);
         if (briefing == null) {
             return new ResponseEntity<>(new RequestError(404,
                                                         "target briefing not found",
@@ -120,7 +119,7 @@ public class UserBriefingServlet {
     @PostMapping("/conducted")
     public ResponseEntity addConductedBriefing(@RequestBody UserBriefing userBriefing) {
         User dbUser = userService.get(userBriefing.getUser().getId());
-        Briefing dbBriefing = briefingService.get(userBriefing.getBriefing().getId());
+        Briefing dbBriefing = briefingService.getById(userBriefing.getBriefing().getId());
         if(dbUser == null || dbBriefing == null){
             return new ResponseEntity<>(new RequestError(404,
                                                         "user or briefing not found",

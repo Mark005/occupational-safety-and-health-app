@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/rest/registration")
-public class RegistrationServlet {
+public class RegistrationController {
 
     @Autowired
     private UserCredentialsService userCredentialsService;

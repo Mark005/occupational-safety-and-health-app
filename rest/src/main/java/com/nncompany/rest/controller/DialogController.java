@@ -19,7 +19,7 @@ import java.util.Date;
 
 @RestController
 @RequestMapping("/api/rest/creds")
-public class DialogServlet {
+public class DialogController {
 
     @Autowired
     MessageService messageService;
