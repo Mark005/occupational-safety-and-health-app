@@ -1,0 +1,1 @@
+# Application for internal communication and monitoring of OSH briefings

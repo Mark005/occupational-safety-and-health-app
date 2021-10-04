@@ -1,0 +1,32 @@
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+target/
+
+#Eclipse files
+**/.project
+**/.classpath
+**/.settings/
+blog/bin/
+**/.tern-project
+**/.factorypath
+
+#IntelliJ files
+**/*.iml
+**/.idea
+**/.gradle
+
+#Logs
+**/app.log*
+
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# secure data
+*.crt
+*.cer
