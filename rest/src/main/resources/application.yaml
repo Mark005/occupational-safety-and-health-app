@@ -40,10 +40,10 @@ app:
     url: /api/v1
   auth:
     antMatchers:
-      - /**,
-      - ${app.rest.url}/login,
-      - ${app.rest.url}/checkLogin,
-      - ${app.rest.url}/registration/**,
+      - /**
+      - ${app.rest.url}/login
+      - ${app.rest.url}/checkLogin
+      - ${app.rest.url}/registration/**
       - /h2-console/**
 
 
