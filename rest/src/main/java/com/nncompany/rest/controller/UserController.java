@@ -1,10 +1,11 @@
 package com.nncompany.rest.controller;
 
+import com.nncompany.api.dto.user.UserUpdateDto;
 import com.nncompany.api.interfaces.services.UserService;
 import com.nncompany.api.model.entities.User;
-import com.nncompany.api.model.wrappers.RequestError;
+import com.nncompany.api.dto.RequestError;
 import com.nncompany.api.model.wrappers.ResponseList;
-import com.nncompany.impl.util.UserKeeper;
+import com.nncompany.impl.util.SecurityUtils;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/rest/creds")
+@RequestMapping("${app.rest.url}")
 public class UserController {
 
     @Autowired
@@ -25,9 +26,9 @@ public class UserController {
 
     @ApiOperation(value = "Get current logged user")
     @ApiResponse(code = 200, message = "User returned successfully", response = User.class)
-    @GetMapping("/user")
+    @GetMapping("/user/current")
     public ResponseEntity<User> getLoggedUser() {
-        return ResponseEntity.ok(UserKeeper.getLoggedUser());
+        return ResponseEntity.ok(SecurityUtils.getCurrentUser());
     }
 
     @ApiOperation(value = "Get users with pagination")
@@ -35,14 +36,14 @@ public class UserController {
             @ApiResponse(code = 200, message = "Users returned successfully", response = ResponseList.class),
             @ApiResponse(code = 400, message = "Invalid request params", response = RequestError.class)
     })
-    @GetMapping("/users")
+    @GetMapping("/user")
     public ResponseEntity<Object> getUsers(@RequestParam Integer page,
                                            @RequestParam Integer pageSize) {
-        Page<User> withPagination = userService.getWithPagination(page, pageSize);
+        Page<User> withPagination = userService.findAllUsers(page, pageSize);
         return ResponseEntity.ok(
-                new ResponseList<User>(
+                new ResponseList(
                         withPagination.getContent(),
-                        withPagination.getTotalPages()));
+                        withPagination.getTotalElements()));
     }
 
     @ApiOperation(value = "Get user by id")
@@ -51,15 +52,9 @@ public class UserController {
             @ApiResponse(code = 400, message = "Invalid path variables", response = RequestError.class),
             @ApiResponse(code = 404, message = "User with current id not found", response = RequestError.class)
     })
-    @GetMapping("/users/{id}")
+    @GetMapping("/user/{id}")
     public ResponseEntity<Object> getUserById(@PathVariable Integer id) {
-        User user = userService.get(id);
-        if (user == null) {
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "user not found",
-                                                        "user deleted or not created"),
-                                                        HttpStatus.NOT_FOUND);
-        }
+        User user = userService.findById(id);
         return ResponseEntity.ok(user);
     }
 
@@ -69,26 +64,16 @@ public class UserController {
             @ApiResponse(code = 400, message = "Invalid request params", response = RequestError.class),
             @ApiResponse(code = 404, message = "Users with this criteria not found", response = RequestError.class)
     })
-    @GetMapping("/users/search")
+    @GetMapping("/user/search")
     public ResponseEntity<Object> findUsers(@RequestParam Integer page,
                                             @RequestParam Integer pageSize,
                                             @RequestParam String searchString) {
-        List<User> users = userService.search(searchString);
-        if (users == null || users.size() == 0) {
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "users not found",
-                                                        "users with this criteria not found"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-        ResponseList<User> responseList = new ResponseList();
-        Integer firstItem = page * pageSize;
-        Integer lastItem = page * pageSize + pageSize;
-        responseList.setList(users.subList(firstItem > users.size() ? users.size() : firstItem,
-                lastItem > users.size() ? users.size() : lastItem));
-        responseList.setTotal(users.size());
-        return ResponseEntity.ok(responseList);
+        Page<User> usersPage = userService.search(searchString, page, pageSize);
+        return ResponseEntity.ok(
+                new ResponseList(
+                        usersPage.getContent(),
+                        usersPage.getTotalElements()));
     }
-
 
     @ApiOperation(value = "Update user by id except admin status " +
             "(only admin can update someone else except itself, " +
@@ -99,32 +84,11 @@ public class UserController {
             @ApiResponse(code = 403, message = "You have hot permission to change this user", response = RequestError.class),
             @ApiResponse(code = 404, message = "User with current id not found", response = RequestError.class)
     })
-    @PutMapping("/users/{id}")
-    public ResponseEntity updateUser(@PathVariable Integer id,
-                                     @RequestBody User requestUser) {
-        User loggedUser = UserKeeper.getLoggedUser();
-        User targetUser = userService.get(id);
-        if (targetUser == null) {
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "user not found",
-                                                        "user deleted or not created"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-/*        if (loggedUser.isAdmin()) {
-            requestUser.setId(id);
-            userService.update(requestUser);*/
-            return new ResponseEntity<>(requestUser, HttpStatus.OK);
-        /*} else if (targetUser.equals(loggedUser)) {
-            requestUser.setId(id);
-            requestUser.setAdmin(loggedUser.isAdmin());
-            userService.update(requestUser);
-            return new ResponseEntity<>(requestUser, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(new RequestError(403,
-                                                        "access denied",
-                                                        "you have hot permission to change this user"),
-                                                        HttpStatus.FORBIDDEN);
-        }*/
+    @PutMapping("/user/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Integer id,
+                                           @RequestBody UserUpdateDto userDto) {
+        userDto.setId(id);
+        return ResponseEntity.ok(userService.update(userDto));
     }
 
     @ApiOperation(value = "Delete user by id (only admin can delete someone else except itself)")
@@ -134,10 +98,10 @@ public class UserController {
             @ApiResponse(code = 403, message = "You have hot permission to delete this user", response = RequestError.class),
             @ApiResponse(code = 404, message = "User with current id not found", response = RequestError.class)
     })
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/user/{id}")
     public ResponseEntity deleteUser(@PathVariable Integer id) {
-        User targetUser = userService.get(id);
-        User loggedUser = UserKeeper.getLoggedUser();
+        User targetUser = userService.findById(id);
+        User loggedUser = SecurityUtils.getCurrentUser();
        /* if (targetUser == null) {
             return new ResponseEntity<>(new RequestError(404,
                                                         "user not found",
@@ -146,7 +110,7 @@ public class UserController {
         }
         if (targetUser.equals(loggedUser) || loggedUser.isAdmin()) {
             userService.delete(targetUser);*/
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 /*        } else {
             return new ResponseEntity<>(new RequestError(403,
                                                         "access denied",

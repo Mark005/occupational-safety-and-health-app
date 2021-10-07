@@ -1,11 +1,12 @@
 package com.nncompany.rest.controller;
 
+import com.nncompany.api.dto.user.CheckLoginDto;
+import com.nncompany.api.dto.user.UserRegistrationDto;
 import com.nncompany.api.interfaces.services.UserCredentialsService;
 import com.nncompany.api.interfaces.services.UserService;
 import com.nncompany.api.model.entities.User;
-import com.nncompany.api.model.entities.UserCredentials;
 import com.nncompany.api.model.wrappers.BooleanResponse;
-import com.nncompany.api.model.wrappers.RequestError;
+import com.nncompany.api.dto.RequestError;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/api/rest/registration")
+@RequestMapping("${app.rest.url}/registration")
 public class RegistrationController {
 
     @Autowired
@@ -28,43 +29,27 @@ public class RegistrationController {
     @Autowired
     private UserService userService;
 
-    @ApiOperation(value = "Check if the login is busy")
+    @ApiOperation(value = "Check if the login is already exist")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Received response in json", response = BooleanResponse.class),
-            @ApiResponse(code = 400, message = "Invalid or not added login field", response = RequestError.class)
+            @ApiResponse(code = 400, message = "Invalid request", response = RequestError.class)
     })
     @PostMapping("/checkLogin")
-    public ResponseEntity<Object> login(@RequestBody UserCredentials requestUserCredentials) {
-        if(requestUserCredentials.getLogin() == null ){
-            return new ResponseEntity<>(new RequestError(400,
-                                                        "invalid request json",
-                                                        "json must have login"),
-                                                        HttpStatus.BAD_REQUEST);
-        }
-        if (userCredentialsService.checkLogin(requestUserCredentials.getLogin())) {
-            return ResponseEntity.ok(new BooleanResponse(true));
-        } else {
-            return ResponseEntity.ok(new BooleanResponse(false));
-        }
+    public ResponseEntity<BooleanResponse> login(@RequestBody CheckLoginDto loginDto) {
+        return ResponseEntity.ok(
+                new BooleanResponse(
+                        userCredentialsService.checkLogin(loginDto.getLogin())));
     }
 
     @ApiOperation(value = "Registration new user")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "New user registered successfully", response = User.class),
             @ApiResponse(code = 400, message = "Invalid input json (check models for more info), " +
-                                               "or current login is already exist", response = RequestError.class)
+                                               "or current login is already exist", response = RequestError.class),
+            @ApiResponse(code = 409, message = "New user registered successfully", response = RequestError.class)
     })
     @PostMapping("/user")
-    public ResponseEntity registration(@RequestBody UserCredentials requestUserCredentials) {
-        if (userCredentialsService.checkLogin(requestUserCredentials.getLogin())) {
-            return new ResponseEntity<>(new RequestError(400,
-                                                        "login isn't unique",
-                                                        "current login is already exist"),
-                                                        HttpStatus.BAD_REQUEST);
-        }
-        /*requestUserCreds.getUser().setAdmin(false);*/
-        userService.save(requestUserCredentials.getUser());
-        userCredentialsService.save(requestUserCredentials);
-        return new ResponseEntity<>(requestUserCredentials.getUser(), HttpStatus.CREATED);
+    public ResponseEntity<User> registration(@RequestBody UserRegistrationDto requestUserCredentials) {
+        return new ResponseEntity<>(userService.registerUser(requestUserCredentials), HttpStatus.CREATED);
     }
 }

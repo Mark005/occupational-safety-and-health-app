@@ -1,23 +1,23 @@
 package com.nncompany.rest.controller;
 
+import com.nncompany.api.dto.message.ChatMessageCreateDto;
+import com.nncompany.api.dto.message.MessageTextUpdateDto;
 import com.nncompany.api.interfaces.services.MessageService;
 import com.nncompany.api.interfaces.services.UserService;
 import com.nncompany.api.model.entities.Message;
-import com.nncompany.api.model.wrappers.RequestError;
+import com.nncompany.api.dto.RequestError;
 import com.nncompany.api.model.wrappers.ResponseList;
-import com.nncompany.impl.util.UserKeeper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-
 @RestController
-@RequestMapping("/api/rest/creds")
+@RequestMapping("${app.rest.url}")
 public class ChatController {
 
     @Autowired
@@ -35,9 +35,11 @@ public class ChatController {
     @GetMapping("/chat")
     public ResponseEntity<Object> getChatsMessages(@RequestParam Integer page,
                                                    @RequestParam Integer pageSize){
-        ResponseList responseList = new ResponseList<>(messageService.getChatWithPagination(page, pageSize),
-                                                       messageService.getTotalCountMessages(UserKeeper.getLoggedUser(),null));
-        return ResponseEntity.ok(responseList);
+        final Page<Message> chatWithPagination = messageService.getChatWithPagination(page, pageSize);
+        return ResponseEntity.ok(
+                new ResponseList(
+                        chatWithPagination.getContent(),
+                        chatWithPagination.getTotalElements()));
     }
 
     @ApiOperation(value = "Get chat's message by id")
@@ -49,20 +51,7 @@ public class ChatController {
     })
     @GetMapping("/chat/{msgId}")
     public ResponseEntity<Object> getChatsMessage(@PathVariable Integer msgId){
-        Message dbMessage = messageService.get(msgId);
-        if(dbMessage == null){
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "message not found",
-                                                        "message with current id is deleted or not created"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-        if(dbMessage.getUserTo() != null){
-            return new ResponseEntity<>(new RequestError(403,
-                                                        "access denied for this message",
-                                                        "message with current id not from common chat"),
-                                                        HttpStatus.FORBIDDEN);
-        }
-        return ResponseEntity.ok(dbMessage);
+        return ResponseEntity.ok(messageService.getChatMessageById(msgId));
     }
 
     @ApiOperation(value = "Send message to common chat")
@@ -71,11 +60,8 @@ public class ChatController {
             @ApiResponse(code = 400, message = "Invalid message json, for more info check models")
     })
     @PostMapping("/chat")
-    public ResponseEntity sendMessageToChat(@RequestBody Message message){
-        message.setUserFrom(UserKeeper.getLoggedUser());
-        message.setDate(new Date());
-        messageService.save(message);
-        return new ResponseEntity<>(message, HttpStatus.CREATED);
+    public ResponseEntity<Message> sendMessageToChat(@RequestBody ChatMessageCreateDto messageDto){
+        return new ResponseEntity<>(messageService.saveChatMessage(messageDto), HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Change chat's message text(Attention: user can change only his message and only message's text)")
@@ -85,26 +71,11 @@ public class ChatController {
             @ApiResponse(code = 403, message = "Message with current id from private dialog, or you are not creator this message", response = RequestError.class),
             @ApiResponse(code = 404, message = "Message not found", response = RequestError.class)
     })
-    @PatchMapping("/chat/{msgId}")
-    public ResponseEntity changeChatsMessage(@PathVariable Integer msgId,
-                                             @RequestBody Message message){
-        Message dbMessage = messageService.get(msgId);
-        if(dbMessage == null){
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "message not found",
-                                                        "message with current id is deleted or not created"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-        if(!dbMessage.getUserFrom().equals(UserKeeper.getLoggedUser()) ||
-            dbMessage.getUserTo() != null) {
-            return new ResponseEntity<>(new RequestError(403,
-                                                        "access denied for this message",
-                                                        "you are not creator or message with current id not from common chat"),
-                                                        HttpStatus.FORBIDDEN);
-        }
-        dbMessage.setText(message.getText());
-        messageService.update(dbMessage);
-        return new ResponseEntity<>(dbMessage, HttpStatus.OK);
+    @PatchMapping("/chat/{messageId}")
+    public ResponseEntity<Message> changeChatsMessage(@PathVariable Integer messageId,
+                                                      @RequestBody MessageTextUpdateDto messageDto) {
+        messageDto.setId(messageId);
+        return new ResponseEntity<>(messageService.updateMessageText(messageDto), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Delete chat's message text(Attention: user can delete only his message)")
@@ -114,23 +85,9 @@ public class ChatController {
             @ApiResponse(code = 403, message = "Message with current id from private dialog, or you are not creator this message", response = RequestError.class),
             @ApiResponse(code = 404, message = "Message not found", response = RequestError.class)
     })
-    @DeleteMapping("/chat/{msgId}")
-    public ResponseEntity deleteChatsMessage(@PathVariable Integer msgId){
-        Message dbMessage = messageService.get(msgId);
-        if(dbMessage == null){
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "message not found",
-                                                        "message with current id is deleted or not created"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-        if(!dbMessage.getUserFrom().equals(UserKeeper.getLoggedUser()) ||
-           dbMessage.getUserTo() != null) {
-            return new ResponseEntity<>(new RequestError(403,
-                                                        "access denied for this message",
-                                                        "you are not creator or message with current id not from common chat"),
-                                                        HttpStatus.FORBIDDEN);
-        }
-        messageService.delete(dbMessage);
+    @DeleteMapping("/chat/{messageId}")
+    public ResponseEntity<Void> deleteChatsMessage(@PathVariable Integer messageId){
+        messageService.deleteById(messageId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

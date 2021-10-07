@@ -1,7 +1,7 @@
 package com.nncompany.rest.controller;
 
-import com.nncompany.api.model.entities.CredentialsDto;
-import com.nncompany.api.model.wrappers.RequestError;
+import com.nncompany.api.dto.CredentialsDto;
+import com.nncompany.api.dto.RequestError;
 import com.nncompany.api.model.wrappers.Token;
 import com.nncompany.rest.security.service.AuthenticationService;
 import io.swagger.annotations.ApiOperation;
@@ -27,6 +27,7 @@ public class AuthenticationController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Login successful", response = Token.class),
             @ApiResponse(code = 400, message = "Invalid json, need add login and pass", response = RequestError.class),
+            @ApiResponse(code = 401, message = "Invalid pair of login and password", response = RequestError.class),
             @ApiResponse(code = 404, message = "Can't find user with this login and password", response = RequestError.class)
     })
     @PostMapping("/login")

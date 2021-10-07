@@ -1,91 +1,93 @@
 package com.nncompany.rest.controller;
 
-import com.nncompany.api.interfaces.services.BriefingService;
+import com.nncompany.api.dto.RequestError;
+import com.nncompany.api.dto.userBriefing.UserBriefingCreateDto;
+import com.nncompany.api.dto.userBriefing.UserBriefingUpdateDto;
 import com.nncompany.api.interfaces.services.UserBriefingService;
-import com.nncompany.api.interfaces.services.UserService;
 import com.nncompany.api.model.entities.Briefing;
 import com.nncompany.api.model.entities.User;
 import com.nncompany.api.model.entities.UserBriefing;
 import com.nncompany.api.model.enums.UserBriefingSort;
-import com.nncompany.api.model.wrappers.RequestError;
 import com.nncompany.api.model.wrappers.ResponseList;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/rest/creds/user-briefing")
+@RequestMapping("${app.rest.url}/user-briefing")
 public class UserBriefingController {
 
     @Autowired
     UserBriefingService userBriefingService;
 
-    @Autowired
-    BriefingService briefingService;
-
-    @Autowired
-    UserService userService;
-
-    @ApiOperation(value = "Get user's briefings by user's id")
+    @ApiOperation(value = "Get user's passed briefings")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Briefings received successfully", response = Briefing[].class),
+            @ApiResponse(code = 200, message = "Briefings received successfully", response = ResponseList.class),
             @ApiResponse(code = 400, message = "Invalid path variable", response = RequestError.class),
             @ApiResponse(code = 404, message = "Target user not found", response = RequestError.class),
     })
-    @GetMapping("/conducted-by-user/{id}")
-    public ResponseEntity<Object> getBriefingsByCurrentUser(@PathVariable Integer id) {
-        User user = userService.get(id);
-        if (user == null) {
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "target user not found",
-                                                        "user deleted or not created"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-        return ResponseEntity.ok(userBriefingService.getBriefingsByCurrentUser(user));
+    @GetMapping("/conducted-to-me")
+    public ResponseEntity<ResponseList> getMyPassedBriefings(@RequestParam Integer page,
+                                                             @RequestParam Integer pageSize) {
+        Page<UserBriefing> userBriefingsPage = userBriefingService.getUserBriefings(page, pageSize);
+        return ResponseEntity.ok(
+                new ResponseList(
+                        userBriefingsPage.getContent(),
+                        userBriefingsPage.getTotalElements()));
+    }
+
+    @ApiOperation(value = "Get user's briefings by user's id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Briefings received successfully", response = ResponseList.class),
+            @ApiResponse(code = 400, message = "Invalid path variable", response = RequestError.class),
+            @ApiResponse(code = 404, message = "Target user not found", response = RequestError.class),
+    })
+    @GetMapping("/conducted-by-user/{userId}")
+    public ResponseEntity<Object> getBriefingsByCurrentUser(@PathVariable Integer userId,
+                                                            @RequestParam Integer page,
+                                                            @RequestParam Integer pageSize) {
+        Page<Briefing> briefingsPage = userBriefingService.getBriefingsByCurrentUser(userId, page, pageSize);
+        return ResponseEntity.ok(
+                new ResponseList(
+                        briefingsPage.getContent(),
+                        briefingsPage.getTotalElements()));
     }
 
     @ApiOperation(value = "Get users by briefing id")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Users received successfully", response = User[].class),
+            @ApiResponse(code = 200, message = "Users received successfully", response = ResponseList.class),
             @ApiResponse(code = 400, message = "Invalid path variable", response = RequestError.class),
             @ApiResponse(code = 404, message = "Target briefing not found", response = RequestError.class),
     })
-    @GetMapping("/conducted-by-briefing/{id}")
-    public ResponseEntity<Object> getUsersByCurrentBriefing(@PathVariable Integer id) {
-        Briefing briefing = briefingService.getById(id);
-        if (briefing == null) {
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "target briefing not found",
-                                                        "briefing deleted or not created"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-        return ResponseEntity.ok(userBriefingService.getUsersByCurrentBriefing(briefing));
+    @GetMapping("/conducted-by-briefing/{briefingId}")
+    public ResponseEntity<Object> getUsersByCurrentBriefing(@PathVariable Integer briefingId,
+                                                            @RequestParam Integer page,
+                                                            @RequestParam Integer pageSize) {
+        final Page<User> userPage = userBriefingService.getUsersByCurrentBriefing(briefingId, page, pageSize);
+        return ResponseEntity.ok(
+                new ResponseList(
+                        userPage.getContent(),
+                        userPage.getTotalElements()));
     }
 
-    @ApiOperation(value = "Get conducted briefing by id")
+    @ApiOperation(value = "Get passed briefing by id")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Received successfully", response = UserBriefing.class),
             @ApiResponse(code = 400, message = "Invalid path variable", response = RequestError.class),
             @ApiResponse(code = 404, message = "Current conduction not found", response = RequestError.class),
     })
     @GetMapping("/conducted/{id}")
-    public ResponseEntity<Object> getById(@PathVariable Integer id) {
-        UserBriefing userBriefing = userBriefingService.get(id);
-        if(userBriefing == null){
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "not found",
-                                                        "Current conduction deleted or not created"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-        return ResponseEntity.ok(userBriefing);
+    public ResponseEntity<UserBriefing> getById(@PathVariable Integer id) {
+        return ResponseEntity.ok(userBriefingService.findById(id));
     }
 
-    @ApiOperation(value = "Get all conducted briefings with sorting")
+    @ApiOperation(value = "Get all passed briefings with sorting")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Users received successfully", response = ResponseList.class),
             @ApiResponse(code = 400, message = "Invalid request params", response = RequestError.class),
@@ -95,21 +97,15 @@ public class UserBriefingController {
                                          @RequestParam Integer pageSize,
                                          @RequestParam UserBriefingSort sort,
                                          @RequestParam Sort.Direction direction) {
-        if (sort == null || direction == null) {
-            return new ResponseEntity<>(new RequestError(400,
-                                                        "invalid request params",
-                                                        "one of request params(sort or direction) = null, " +
-                                                                   "for more info check available params"),
-                                                        HttpStatus.BAD_REQUEST);
-        }
-        ResponseList<UserBriefing> responseList = new ResponseList<>();
-        responseList.setList(userBriefingService.getAll(page, pageSize, sort, direction));
-        responseList.setTotal(userBriefingService.getTotalCount());
-        return ResponseEntity.ok(responseList);
+        Page<UserBriefing> briefingPage = userBriefingService.findAll(page, pageSize, sort, direction);
+        return ResponseEntity.ok(
+                new ResponseList(
+                        briefingPage.getContent(),
+                        briefingPage.getTotalElements()));
     }
 
 
-    @ApiOperation(value = "Add new briefing conduction")
+    @ApiOperation(value = "Add new passed briefing")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Briefing conducted successfully", response = UserBriefing.class),
             @ApiResponse(code = 400, message = "Invalid user-briefing json"),
@@ -117,19 +113,8 @@ public class UserBriefingController {
             @ApiResponse(code = 404, message = "User or briefing not found", response = RequestError.class),
     })
     @PostMapping("/conducted")
-    public ResponseEntity addConductedBriefing(@RequestBody UserBriefing userBriefing) {
-        User dbUser = userService.get(userBriefing.getUser().getId());
-        Briefing dbBriefing = briefingService.getById(userBriefing.getBriefing().getId());
-        if(dbUser == null || dbBriefing == null){
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "user or briefing not found",
-                                                        "user or briefing deleted or not created"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-        userBriefing.setUser(dbUser);
-        userBriefing.setBriefing(dbBriefing);
-        userBriefingService.save(userBriefing);
-        return new ResponseEntity<>(userBriefing, HttpStatus.CREATED);
+    public ResponseEntity<UserBriefing> addConductedBriefing(@RequestBody UserBriefingCreateDto userBriefingDto) {
+        return new ResponseEntity<>(userBriefingService.save(userBriefingDto), HttpStatus.CREATED);
     }
 
 
@@ -141,18 +126,10 @@ public class UserBriefingController {
             @ApiResponse(code = 404, message = "Briefing conduction not found", response = RequestError.class),
     })
     @PatchMapping("/conducted/{id}")
-    public ResponseEntity updateConductionDate(@PathVariable Integer id,
-                                               @RequestBody UserBriefing userBriefing) {
-        UserBriefing dbUserBriefing = userBriefingService.get(id);
-        if(dbUserBriefing == null){
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "briefing conduction not found",
-                                                        "briefing not conducted or conduction deleted"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-        dbUserBriefing.setLastDate(userBriefing.getLastDate());
-        userBriefingService.update(dbUserBriefing);
-        return new ResponseEntity<>(dbUserBriefing, HttpStatus.OK);
+    public ResponseEntity<UserBriefing> updateConductionDate(@PathVariable Integer id,
+                                                             @RequestBody UserBriefingUpdateDto userBriefingDto) {
+        userBriefingDto.setId(id);
+        return new ResponseEntity<>(userBriefingService.update(userBriefingDto), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Delete briefing conduction")
@@ -163,15 +140,8 @@ public class UserBriefingController {
             @ApiResponse(code = 404, message = "Briefing conduction not found", response = RequestError.class),
     })
     @DeleteMapping("/conducted/{id}")
-    public ResponseEntity deleteConductedBriefing(@PathVariable Integer id) {
-        UserBriefing userBriefing = userBriefingService.get(id);
-        if(userBriefing == null){
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "briefing conduction not found",
-                                                        "briefing not conducted or conduction deleted"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-        userBriefingService.delete(userBriefing);
+    public ResponseEntity<Void> deleteConductedBriefing(@PathVariable Integer id) {
+        userBriefingService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

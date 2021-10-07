@@ -1,23 +1,27 @@
 package com.nncompany.api.interfaces.services;
 
+import com.nncompany.api.dto.task.TaskChangeStatusDto;
+import com.nncompany.api.dto.task.TaskCreateDto;
 import com.nncompany.api.model.entities.Task;
 import com.nncompany.api.model.entities.User;
 import com.nncompany.api.model.enums.TaskStatus;
 import com.nncompany.api.model.enums.TaskType;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface TaskService {
 
-    Task getById(int id);
 
-    List<Task> getWithPagination(Integer offset, Integer limit);
+    Task findById(Integer id);
 
-    List<Task> getUsersTasks(User user, TaskStatus taskSatus, TaskType taskType);
+    Page<Task> findAllAvailableTasksForCurrentUser(TaskType type, TaskStatus status, Integer page, Integer pageSize);
 
-    void save(Task task);
+    Task create(TaskCreateDto taskCreateDto);
 
-    void update(Task task);
+    Task changeTaskStatus(TaskChangeStatusDto taskDto);
 
-    void delete(Task task);
+    Task update(Task task);
+
+    void delete(Integer id);
 }

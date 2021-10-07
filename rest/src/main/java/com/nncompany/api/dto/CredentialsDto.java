@@ -1,4 +1,4 @@
-package com.nncompany.api.model.entities;
+package com.nncompany.api.dto;
 
 import lombok.Data;
 

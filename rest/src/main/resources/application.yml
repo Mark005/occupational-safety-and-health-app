@@ -15,14 +15,14 @@ spring:
 #    initialization-mode: always
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:~/test_db
+    url: jdbc:h2:mem:test_db
     username: sa
     password:
      #initialization-mode: always
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create
     #database-platform: org.hibernate.dialect.PostgreSQLDialect
     database-platform: org.hibernate.dialect.H2Dialect
     properties:
@@ -40,7 +40,7 @@ app:
   rest:
     url: /api/v1
   auth:
-    antMatchers: /**, /api/v1/login, /api/v1/logout, /h2-console/**
+    antMatchers: /**, /api/v1/login, /api/v1/checkLogin, ${app.rest.url}/registration/**, /h2-console/**
 
 
 jwt:

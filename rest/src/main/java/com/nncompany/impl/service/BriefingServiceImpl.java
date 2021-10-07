@@ -20,7 +20,7 @@ public class BriefingServiceImpl implements BriefingService {
     private BriefingStore briefingStore;
 
     @Override
-    public Briefing getById(int id) {
+    public Briefing getById(Integer id) {
         return briefingStore.getById(id);
     }
 
@@ -40,7 +40,7 @@ public class BriefingServiceImpl implements BriefingService {
     }
 
     @Override
-    public void delete(Integer id) {
+    public void deleteById(Integer id) {
         briefingStore.deleteById(id);
     }
 }

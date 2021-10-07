@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface BriefingService {
 
-    Briefing getById(int id);
+    Briefing getById(Integer id);
 
     Page<Briefing> getWithPagination(Integer page, Integer pageSize);
 
@@ -15,5 +15,5 @@ public interface BriefingService {
 
     Briefing update(Briefing briefing);
 
-    void delete(Integer id);
+    void deleteById(Integer id);
 }

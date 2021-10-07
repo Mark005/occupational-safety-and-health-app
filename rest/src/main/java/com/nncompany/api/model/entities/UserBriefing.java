@@ -1,8 +1,15 @@
 package com.nncompany.api.model.entities;
 
+import lombok.*;
+
 import javax.persistence.*;
 import java.util.Date;
 
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "user_has_briefing")
 public class UserBriefing {

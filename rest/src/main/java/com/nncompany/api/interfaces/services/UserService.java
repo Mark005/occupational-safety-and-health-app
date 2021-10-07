@@ -1,21 +1,23 @@
 package com.nncompany.api.interfaces.services;
 
+import com.nncompany.api.dto.user.UserRegistrationDto;
+import com.nncompany.api.dto.user.UserUpdateDto;
 import com.nncompany.api.model.entities.User;
 import org.springframework.data.domain.Page;
 
-import java.util.List;
-
 public interface UserService {
 
-    User get(int id);
+    User findById(Integer id);
 
-    Page<User> getWithPagination(Integer page, Integer pageSize);
+    Page<User> findAllUsers(Integer page, Integer pageSize);
 
-    List<User> search(String nameOrAndSurname);
+    Page<User> search(String nameOrAndSurname, Integer page, Integer pageSize);
 
-    void save(User user);
+    User registerUser(UserRegistrationDto userDto);
 
-    void update(User user);
+    User save(User user);
 
-    void delete(User user);
+    User update(UserUpdateDto user);
+
+    void delete(Integer id);
 }

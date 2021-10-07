@@ -2,7 +2,7 @@ package com.nncompany.rest.controller;
 
 import com.nncompany.api.interfaces.services.BriefingService;
 import com.nncompany.api.model.entities.Briefing;
-import com.nncompany.api.model.wrappers.RequestError;
+import com.nncompany.api.dto.RequestError;
 import com.nncompany.api.model.wrappers.ResponseList;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -83,7 +83,7 @@ public class BriefingController {
     })
     @DeleteMapping("/briefings/{id}")
     public ResponseEntity<Object> deleteBriefing(@PathVariable Integer id) {
-        briefingService.delete(id);
+        briefingService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

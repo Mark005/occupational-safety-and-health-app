@@ -1,29 +1,31 @@
 package com.nncompany.api.interfaces.services;
 
+import com.nncompany.api.dto.userBriefing.UserBriefingCreateDto;
+import com.nncompany.api.dto.userBriefing.UserBriefingUpdateDto;
 import com.nncompany.api.model.entities.Briefing;
 import com.nncompany.api.model.entities.User;
 import com.nncompany.api.model.entities.UserBriefing;
-import com.nncompany.api.model.enums.Direction;
 import com.nncompany.api.model.enums.UserBriefingSort;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
 public interface UserBriefingService {
 
-    UserBriefing get(int id);
+    UserBriefing findById(Integer id);
 
-    List<Briefing> getBriefingsByCurrentUser(User user);
+    Page<Briefing> getBriefingsByCurrentUser(Integer userId, Integer page, Integer pageSize);
 
-    List<User> getUsersByCurrentBriefing(Briefing briefing);
+    Page<User> getUsersByCurrentBriefing(Integer briefingId, Integer page, Integer pageSize);
 
-    List<UserBriefing> getAll(Integer page, Integer pageSize, UserBriefingSort sort, Sort.Direction direction);
+    Page<UserBriefing> findAll(Integer page, Integer pageSize, UserBriefingSort sort, Sort.Direction direction);
 
-    List<UserBriefing> getWithPagination(Integer offset, Integer limit);
+    Page<UserBriefing> getUserBriefings(Integer offset, Integer limit);
 
-    void save(UserBriefing userBriefing);
+    UserBriefing save(UserBriefingCreateDto userBriefing);
 
-    void update(UserBriefing userBriefing);
+    UserBriefing update(UserBriefingUpdateDto userBriefingDto);
 
-    void delete(UserBriefing userBriefing);
+    void deleteById(Integer userBriefingId);
 }

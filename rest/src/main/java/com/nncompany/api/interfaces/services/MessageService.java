@@ -1,24 +1,26 @@
 package com.nncompany.api.interfaces.services;
 
+import com.nncompany.api.dto.message.ChatMessageCreateDto;
+import com.nncompany.api.dto.message.DialogMessageCreateDto;
+import com.nncompany.api.dto.message.MessageTextUpdateDto;
 import com.nncompany.api.model.entities.Message;
-import com.nncompany.api.model.entities.Task;
-import com.nncompany.api.model.entities.User;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface MessageService {
 
-    Message get(int id);
+    Page<Message> getDialogWithUser(Integer userId, Integer page, Integer pageSize);
 
-    List<Message> getWithPagination(Integer page, Integer pageSize);
+    Page<Message> getChatWithPagination(Integer page, Integer pageSize);
 
-    List<Message> getDialogWithPagination(User userOne, User userTwo, Integer page, Integer pageSize);
+    Message saveChatMessage(ChatMessageCreateDto message);
 
-    List<Message> getChatWithPagination(Integer page, Integer pageSize);
+    Message saveDialogMessage(DialogMessageCreateDto messageDto);
 
-    void save(Message message);
+    Message updateMessageText(MessageTextUpdateDto messageDto);
 
-    void update(Message message);
+    void deleteById(Integer messageId);
 
-    void delete(Message message);
+    Message getChatMessageById(Integer id);
+
+    Message getDialogMessageById(Integer messageId);
 }

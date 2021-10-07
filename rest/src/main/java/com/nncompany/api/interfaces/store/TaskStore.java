@@ -13,5 +13,10 @@ import java.util.List;
 
 public interface TaskStore extends JpaRepository<Task, Integer> {
 
-    Page<Task> findAllByExecutorAndStatusAndType(User user, TaskStatus taskStatus, TaskType taskType);
+    Page<Task> findAllByStatusAndType(TaskStatus taskStatus, TaskType taskType, Pageable pageable);
+
+    Page<Task> findAllByExecutorAndStatusAndType(User user,
+                                                 TaskStatus taskStatus,
+                                                 TaskType taskType,
+                                                 Pageable pageable);
 }

@@ -1,33 +1,30 @@
 package com.nncompany.rest.controller;
 
+import com.nncompany.api.dto.task.TaskChangeStatusDto;
+import com.nncompany.api.dto.task.TaskCreateDto;
 import com.nncompany.api.interfaces.services.TaskService;
-import com.nncompany.api.interfaces.services.UserService;
 import com.nncompany.api.model.entities.Task;
-import com.nncompany.api.model.entities.User;
 import com.nncompany.api.model.enums.TaskStatus;
 import com.nncompany.api.model.enums.TaskType;
-import com.nncompany.api.model.wrappers.RequestError;
+import com.nncompany.api.dto.RequestError;
 import com.nncompany.api.model.wrappers.ResponseList;
-import com.nncompany.impl.util.UserKeeper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/rest/creds")
+@RequestMapping("${app.rest.url}")
 public class TaskController {
 
     @Autowired
     TaskService taskService;
 
-    @Autowired
-    UserService userService;
-
-    @ApiOperation(value = "Get all accessible tasks by type and status with with pagination")
+    @ApiOperation(value = "Get all available tasks for current user by type and status")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Tasks received successfully", response = ResponseList.class),
             @ApiResponse(code = 400, message = "Invalid query params", response = RequestError.class),
@@ -37,17 +34,11 @@ public class TaskController {
                                               @RequestParam Integer pageSize,
                                               @RequestParam TaskType type,
                                               @RequestParam TaskStatus status){
-        User loggedUser = UserKeeper.getLoggedUser();
-        ResponseList responseList = new ResponseList();
-        /*
-        if(loggedUser.isAdmin() || (!loggedUser.isAdmin() && !type.equals(TaskType.PERSONAL))){
-            responseList = new ResponseList(taskService.getAll(page, pageSize, status, type),
-                                            taskService.getTotalCountForGetAll(status, type));
-        } else {
-            responseList = new ResponseList(taskService.getUsersTasks(loggedUser, status, type),
-                                            taskService.getTotalCountForGetUsersTasks(loggedUser, status, type));
-        }*/
-        return ResponseEntity.ok(responseList);
+        Page<Task> tasksPage = taskService.findAllAvailableTasksForCurrentUser(type, status, page, pageSize);
+        return ResponseEntity.ok(
+                new ResponseList(
+                        tasksPage.getContent(),
+                        tasksPage.getTotalElements()));
     }
 
     @ApiOperation(value = "Get task by id")
@@ -58,23 +49,8 @@ public class TaskController {
             @ApiResponse(code = 404, message = "Current task not found", response = RequestError.class),
     })
     @GetMapping("/tasks/{id}")
-    public ResponseEntity<Object> getTask(@PathVariable Integer id){
-        User loggUser = UserKeeper.getLoggedUser();
-        Task task = taskService.getById(id);
-/*        if(task == null){
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "not found",
-                                                        "current task deleted or not created"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-        if(!loggUser.isAdmin() && task.getType().equals(TaskType.PERSONAL) && !task.getExecutor().equals(loggUser)){
-            return new ResponseEntity<>(new RequestError(403,
-                                                        "you have't access to this task",
-                                                        "current task is personal task another user's"),
-                                                        HttpStatus.FORBIDDEN);
-        } else {*/
-            return ResponseEntity.ok(task);
-       /* }*/
+    public ResponseEntity<Object> getTask(@PathVariable Integer id) {
+        return ResponseEntity.ok(taskService.findById(id));
     }
 
 
@@ -86,25 +62,8 @@ public class TaskController {
             @ApiResponse(code = 403, message = "Executor not found", response = RequestError.class),
     })
     @PostMapping("/tasks")
-    public ResponseEntity addTask(@RequestBody Task task){
-        if(task.getExecutor() == null || task.getExecutor().getId() == null){
-            return new ResponseEntity<>(new RequestError(400,
-                                                        "executor not added",
-                                                        "add executor into request"),
-                                                        HttpStatus.BAD_REQUEST);
-        }
-        User dbExecutor = userService.get(task.getExecutor().getId());
-        if(dbExecutor == null) {
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "executor not found",
-                                                        "user deleted or not created"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-        task.setExecutor(dbExecutor);
-        task.setCreator(UserKeeper.getLoggedUser());
-        task.setStatus(TaskStatus.OPEN);
-        taskService.save(task);
-        return new ResponseEntity<>(task, HttpStatus.CREATED);
+    public ResponseEntity<Task> addTask(@RequestBody TaskCreateDto taskCreateDto){
+        return new ResponseEntity<>(taskService.create(taskCreateDto), HttpStatus.CREATED);
     }
 
 
@@ -115,18 +74,10 @@ public class TaskController {
             @ApiResponse(code = 404, message = "Current task not found", response = RequestError.class),
     })
     @PatchMapping("/tasks/{id}")
-    public ResponseEntity changeTask(@PathVariable Integer id,
-                                     @RequestBody Task task){
-        Task dbTask = taskService.getById(id);
-        if(dbTask == null) {
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "target task not found",
-                                                        "task deleted or not created"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-        dbTask.setStatus(task.getStatus());
-        taskService.update(dbTask);
-        return new ResponseEntity<>(dbTask, HttpStatus.OK);
+    public ResponseEntity<Task> changeTaskStatus(@PathVariable Integer id,
+                                           @RequestBody TaskChangeStatusDto taskDto) {
+        taskDto.setId(id);
+        return new ResponseEntity<>(taskService.changeTaskStatus(taskDto), HttpStatus.OK);
     }
 
 
@@ -138,15 +89,8 @@ public class TaskController {
             @ApiResponse(code = 404, message = "Current task not found", response = RequestError.class),
     })
     @DeleteMapping("/tasks/{id}")
-    public ResponseEntity deleteTask(@PathVariable Integer id){
-        Task dbTask = taskService.getById(id);
-        if(dbTask == null) {
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "target task not found",
-                                                        "task deleted or not created"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-        taskService.delete(dbTask);
+    public ResponseEntity<Void> deleteTask(@PathVariable Integer id){
+        taskService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
