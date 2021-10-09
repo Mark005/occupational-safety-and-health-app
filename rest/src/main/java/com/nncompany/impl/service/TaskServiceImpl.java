@@ -68,13 +68,17 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Task create(TaskCreateDto taskDto) {
+        final User executor = userStore
+                .findById(taskDto.getExecutorId())
+                .orElseThrow(() -> new EntityNotFoundException("User with current id not found"));
+
         Task task = Task.builder()
                 .name(taskDto.getName())
                 .type(taskDto.getType())
                 .status(TaskStatus.OPEN)
                 .deadline(taskDto.getDeadline())
                 .creator(SecurityUtils.getCurrentUser())
-                .executor(userStore.getById(taskDto.getExecutorId()))
+                .executor(executor)
                 .build();
         return taskStore.save(task);
     }

@@ -99,23 +99,8 @@ public class UserController {
             @ApiResponse(code = 404, message = "User with current id not found", response = RequestError.class)
     })
     @DeleteMapping("/user/{id}")
-    public ResponseEntity deleteUser(@PathVariable Integer id) {
-        User targetUser = userService.findById(id);
-        User loggedUser = SecurityUtils.getCurrentUser();
-       /* if (targetUser == null) {
-            return new ResponseEntity<>(new RequestError(404,
-                                                        "user not found",
-                                                        "user deleted or not created"),
-                                                        HttpStatus.NOT_FOUND);
-        }
-        if (targetUser.equals(loggedUser) || loggedUser.isAdmin()) {
-            userService.delete(targetUser);*/
+    public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
+        userService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-/*        } else {
-            return new ResponseEntity<>(new RequestError(403,
-                                                        "access denied",
-                                                        "you have hot permission to delete this user"),
-                                                        HttpStatus.FORBIDDEN);
-        }*/
     }
 }

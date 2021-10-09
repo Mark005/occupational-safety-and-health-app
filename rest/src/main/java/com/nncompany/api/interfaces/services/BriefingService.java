@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface BriefingService {
 
-    Briefing getById(Integer id);
+    Briefing findById(Integer id);
 
     Page<Briefing> getWithPagination(Integer page, Integer pageSize);
 

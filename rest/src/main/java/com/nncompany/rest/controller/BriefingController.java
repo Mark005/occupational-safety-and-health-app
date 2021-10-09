@@ -46,7 +46,7 @@ public class BriefingController {
     })
     @GetMapping("/briefings/{id}")
     public ResponseEntity<Object> getBriefingById(@PathVariable Integer id) {
-        return ResponseEntity.ok(briefingService.getById(id));
+        return ResponseEntity.ok(briefingService.findById(id));
     }
 
     @ApiOperation(value = "Add new briefing (Attention: only admin can add new briefings)")

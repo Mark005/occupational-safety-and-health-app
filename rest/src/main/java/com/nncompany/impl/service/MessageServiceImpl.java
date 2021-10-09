@@ -34,7 +34,9 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public Message getChatMessageById(Integer id) {
-        final Message message = messageStore.getById(id);
+        final Message message = messageStore
+                .findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Message with current id not found"));
         if (message.getUserTo() != null) {
             throw new NotChatMessageException("It isn't chat message");
         }
