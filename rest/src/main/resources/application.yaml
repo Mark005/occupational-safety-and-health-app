@@ -36,6 +36,7 @@ spring:
 #    enabled: true
 #    default-schema: company_hierarchy
 app:
+  version: 0.0.1
   rest:
     url: /api/v1
   auth:
@@ -44,12 +45,22 @@ app:
       - ${app.rest.url}/login
       - ${app.rest.url}/checkLogin
       - ${app.rest.url}/registration/**
+      - ${springdoc.swagger-ui.path}
+      - /swagger-ui/**
+      - /v3/api-docs/**
       - /h2-console/**
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
 
 jwt:
   headerName: Auth-Token
   expirationHours: 1
+#
+#springdoc:
+#  api-docs:
+#    enabled:
 
 logging:
   level:
