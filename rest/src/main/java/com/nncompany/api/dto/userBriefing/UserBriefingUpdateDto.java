@@ -3,11 +3,11 @@ package com.nncompany.api.dto.userBriefing;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 public class UserBriefingUpdateDto {
     private Integer id;
-    private Date lastDate;
+    private LocalDateTime lastDate;
 }

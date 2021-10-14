@@ -1,15 +1,16 @@
 version: '3.7'
 
 services:
-#  occupational-safety-and-health-app:
-#    container_name: osh-app
-#    build:
-#      context: ./rest/
-#      dockerfile: Dockerfile
-#    ports:
-#      - "8081:8080"
-#    depends_on:
-#      - postgres_db
+  occupational-safety-and-health-app:
+    container_name: osh-app
+    build:
+      context: ./rest/
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres_db
+      - liquibase
 
   postgres_db:
     container_name: test_postgres_db
@@ -26,7 +27,7 @@ services:
     restart: unless-stopped
 
   liquibase:
-    container_name: test_liquibase
+    container_name: liquibase_changelog_executor
     image: liquibase/liquibase:4.4
     depends_on:
       - postgres_db

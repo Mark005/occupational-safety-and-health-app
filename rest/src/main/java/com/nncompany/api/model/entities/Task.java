@@ -5,7 +5,7 @@ import com.nncompany.api.model.enums.TaskType;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Setter
 @Getter
@@ -17,27 +17,22 @@ import java.util.Date;
 public class Task {
 
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String name;
 
-    @Column(name = "type")
     @Enumerated(EnumType.STRING)
     private TaskType type;
 
-    @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
 
-    private Date deadline;
+    private LocalDateTime deadline;
 
-    @ManyToOne()
-    @JoinColumn(name = "creator")
+    @ManyToOne
     private User creator;
 
-    @ManyToOne()
-    @JoinColumn(name = "executor")
+    @ManyToOne
     private User executor;
 }

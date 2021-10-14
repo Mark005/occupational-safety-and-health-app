@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Objects;
 
@@ -82,7 +83,7 @@ public class MessageServiceImpl implements MessageService {
     public Message saveChatMessage(ChatMessageCreateDto messageDto) {
         Message message = Message.builder()
                 .text(messageDto.getText())
-                .date(new Date())
+                .date(LocalDateTime.now())
                 .userFrom(SecurityUtils.getCurrentUser())
                 .userTo(null)
                 .build();
@@ -93,7 +94,7 @@ public class MessageServiceImpl implements MessageService {
     public Message saveDialogMessage(DialogMessageCreateDto messageDto) {
         Message message = Message.builder()
                 .text(messageDto.getText())
-                .date(new Date())
+                .date(LocalDateTime.now())
                 .userFrom(SecurityUtils.getCurrentUser())
                 .userTo(userStore
                         .findById(messageDto.getUserToId())

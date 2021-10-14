@@ -1,10 +1,9 @@
 package com.nncompany.api.model.entities;
 
 import lombok.*;
-import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Getter
@@ -17,20 +16,17 @@ import java.util.Objects;
 public class Message {
 
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String text;
 
-    private Date date;
+    private LocalDateTime date;
 
-    @ManyToOne()
-    @JoinColumn(name = "user_from")
+    @ManyToOne
     private User userFrom;
 
-    @ManyToOne()
-    @JoinColumn(name = "user_to")
+    @ManyToOne
     private User userTo;
 
     @Override
