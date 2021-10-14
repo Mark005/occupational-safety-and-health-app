@@ -3,6 +3,7 @@ package com.nncompany.api.dto.message;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -10,6 +11,6 @@ import java.util.Date;
 public class ChatMessageDto {
     private Integer id;
     private String text;
-    private Date date;
+    private LocalDateTime date;
     private Integer userFromId;
 }

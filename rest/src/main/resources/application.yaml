@@ -6,35 +6,20 @@ spring:
     name: occupational-safety-and-health-app
   profiles:
     active: "@profileActive@"
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: ${DB_URL:jdbc:postgresql://localhost:5432/postgres}
-#    username: ${DB_USERNAME:postgres}
-#    password: ${DB_PASSWORD:postgres}
-#    initialization-mode: always
   datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:test_db
-    username: sa
-    password:
-     #initialization-mode: always
+    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL:jdbc:postgresql://test_postgres_db:5333/postgres}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create
-    #database-platform: org.hibernate.dialect.PostgreSQLDialect
-    database-platform: org.hibernate.dialect.H2Dialect
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
         format_sql: true
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-#  liquibase:
-#    change-log: classpath:db.changelog/db.changelog-master.xml
-#    enabled: true
-#    default-schema: company_hierarchy
+
 app:
   rest:
     url: /api/v1

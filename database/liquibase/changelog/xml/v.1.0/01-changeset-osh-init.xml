@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="12102021-01"
+               author="mark"
+               dbms="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="users"/>
+            </not>
+        </preConditions>
+        <createTable tableName="users">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="certificate_number" type="int"/>
+            <column name="name" type="varchar(255)"/>
+            <column name="surname" type="varchar(255)"/>
+            <column name="gender" type="varchar(255)"/>
+            <column name="profession" type="varchar(255)"/>
+            <column name="date_employment" type="datetime"/>
+            <column name="role" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="14102021-01"
+               author="mark"
+               dbms="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="briefing"/>
+            </not>
+        </preConditions>
+        <createTable tableName="briefing">
+            <column autoIncrement="true" name="id" type="int">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="interval_in_months" type="int"/>
+            <column name="name" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="14102021-02"
+               author="mark"
+               dbms="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="message"/>
+            </not>
+        </preConditions>
+        <createTable tableName="message">
+            <column autoIncrement="true" name="id" type="int">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="date" type="datetime"/>
+            <column name="text" type="varchar(255)"/>
+            <column name="user_from_id" type="int"/>
+            <column name="user_to_id" type="int"/>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="fk_user_from2user"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 baseColumnNames="user_from_id"
+                                 baseTableName="message"/>
+
+        <addForeignKeyConstraint constraintName="fk_user_to2user"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 baseColumnNames="user_to_id"
+                                 baseTableName="message"/>
+    </changeSet>
+
+    <changeSet id="14102021-03"
+               author="mark"
+               dbms="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="task"/>
+            </not>
+        </preConditions>
+        <createTable tableName="task">
+            <column autoIncrement="true" name="id" type="int">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="deadline" type="datetime"/>
+            <column name="name" type="varchar(255)"/>
+            <column name="status" type="varchar(255)"/>
+            <column name="type" type="varchar(255)"/>
+            <column name="creator_id" type="int"/>
+            <column name="executor_id" type="int"/>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="fk_creator2user"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 baseColumnNames="creator_id"
+                                 baseTableName="task"/>
+
+        <addForeignKeyConstraint constraintName="fk_executor2user"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 baseColumnNames="executor_id"
+                                 baseTableName="task"/>
+    </changeSet>
+
+    <changeSet id="14102021-04"
+               author="mark"
+               dbms="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="user_has_briefing"/>
+            </not>
+        </preConditions>
+        <createTable tableName="user_has_briefing">
+            <column autoIncrement="true" name="id" type="int">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="last_date" type="datetime"/>
+            <column name="briefing_id" type="int"/>
+            <column name="user_id" type="int"/>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="fk_briefing2user"
+                                 referencedTableName="briefing"
+                                 referencedColumnNames="id"
+                                 baseColumnNames="briefing_id"
+                                 baseTableName="user_has_briefing"/>
+
+        <addForeignKeyConstraint constraintName="fk_user2briefing"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 baseColumnNames="user_id"
+                                 baseTableName="user_has_briefing"/>
+    </changeSet>
+
+    <changeSet id="14102021-05"
+               author="mark"
+               dbms="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="user_credentials"/>
+            </not>
+        </preConditions>
+        <createTable tableName="user_credentials">
+            <column autoIncrement="true" name="id" type="int">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="login" type="varchar(255)"/>
+            <column name="pass" type="varchar(255)"/>
+            <column name="user_id" type="int"/>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="fk_user_credentials2user"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 baseColumnNames="user_id"
+                                 baseTableName="user_credentials"/>
+    </changeSet>
+</databaseChangeLog>

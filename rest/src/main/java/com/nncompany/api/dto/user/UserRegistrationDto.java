@@ -4,7 +4,7 @@ import com.nncompany.api.model.enums.Gender;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Setter
 @Getter
@@ -16,5 +16,5 @@ public class UserRegistrationDto {
     private Gender gender;
     private String profession;
     private Integer certificateNumber;
-    private Date dateEmployment;
+    private LocalDateTime dateEmployment;
 }
