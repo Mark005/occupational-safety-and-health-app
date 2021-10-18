@@ -19,11 +19,8 @@ services:
       - "5444:5333"
     volumes:
       - ./database/postgres-volume:/var/lib/postgresql/data/
-    environment:
-      - PGPORT=5333
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=postgres
+    env_file:
+      - .env.postgres
     restart: unless-stopped
 
   liquibase:
@@ -34,9 +31,9 @@ services:
     volumes:
       - ./database/liquibase/changelog:/liquibase/changelog
     command: ['--driver=org.postgresql.Driver',
-              '--url=jdbc:postgresql://test_postgres_db:5333/postgres',
+              '--url=${DB_URL}',
               '--changeLogFile=xml/db.changelog-master.xml',
-              '--username=postgres',
-              '--password=postgres',
+              '--username=${DB_USER}',
+              '--password=${DB_PASSWORD}',
               'update']
     restart: "no"
