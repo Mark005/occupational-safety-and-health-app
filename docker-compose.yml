@@ -3,11 +3,12 @@ version: '3.7'
 services:
   occupational-safety-and-health-app:
     container_name: osh-app
-    build:
-      context: ./rest/
-      dockerfile: Dockerfile
+    image: openjdk:11
+    entrypoint: [ "sh", "-c", "java -jar /target/occupational-safety-and-health-app.jar" ]
     ports:
       - "8081:8080"
+    volumes:
+      - ./rest/target:/target/
     depends_on:
       - postgres_db
       - liquibase
