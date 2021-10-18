@@ -18,7 +18,7 @@ services:
     ports:
       - "5444:5333"
     volumes:
-      - /home/mark/Documents/Repo/My/occupational-safety-and-health-app/database/postgres-volume:/var/lib/postgresql/data/
+      - ./database/postgres-volume:/var/lib/postgresql/data/
     environment:
       - PGPORT=5333
       - POSTGRES_USER=postgres
@@ -32,7 +32,7 @@ services:
     depends_on:
       - postgres_db
     volumes:
-      - /home/mark/Documents/Repo/My/occupational-safety-and-health-app/database/liquibase/changelog:/liquibase/changelog
+      - ./database/liquibase/changelog:/liquibase/changelog
     command: ['--driver=org.postgresql.Driver',
               '--url=jdbc:postgresql://test_postgres_db:5333/postgres',
               '--changeLogFile=xml/db.changelog-master.xml',
