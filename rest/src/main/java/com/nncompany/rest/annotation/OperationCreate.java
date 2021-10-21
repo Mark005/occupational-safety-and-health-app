@@ -42,86 +42,16 @@ public @interface OperationCreate {
     };
 
     /**
-     * @see Operation#method()
-     **/
-    @AliasFor(annotation = Operation.class, attribute = "method")
-    String method() default "POST";
-
-    /**
-     * @see Operation#tags()
-     */
-    @AliasFor(annotation = Operation.class, attribute = "tags")
-    String[] tags() default {};
-
-    /**
      * @see Operation#summary()
      */
     @AliasFor(annotation = Operation.class, attribute = "summary")
     String value() default "Create new entity";
 
     /**
-     * @see Operation#description()
-     */
-    @AliasFor(annotation = Operation.class, attribute = "description")
-    String description() default "";
-
-    /**
-     * @see Operation#requestBody()
-     */
-    @AliasFor(annotation = Operation.class, attribute = "requestBody")
-    RequestBody requestBody() default @RequestBody();
-
-    /**
-     * @see Operation#externalDocs()
-     */
-    @AliasFor(annotation = Operation.class, attribute = "externalDocs")
-    ExternalDocumentation externalDocs() default @ExternalDocumentation();
-
-    /**
-     * @see Operation#operationId()
-     */
-    @AliasFor(annotation = Operation.class, attribute = "operationId")
-    String operationId() default "";
-
-    /**
-     * @see Operation#parameters()
-     */
-    @AliasFor(annotation = Operation.class, attribute = "parameters")
-    Parameter[] parameters() default {};
-
-    /**
-     * @see Operation#deprecated()
-     */
-    @AliasFor(annotation = Operation.class, attribute = "deprecated")
-    boolean deprecated() default false;
-
-    /**
      * @see Operation#security()
      */
     @AliasFor(annotation = Operation.class, attribute = "security")
-    SecurityRequirement[] security() default {};
-
-    /**
-     * @see Operation#servers()
-     */
-    @AliasFor(annotation = Operation.class, attribute = "servers")
-    Server[] servers() default {};
-
-    /**
-     * @see Operation#extensions()
-     */
-    @AliasFor(annotation = Operation.class, attribute = "extensions")
-    Extension[] extensions() default {};
-
-    /**
-     * @see Operation#hidden()
-     */
-    @AliasFor(annotation = Operation.class, attribute = "hidden")
-    boolean hidden() default false;
-
-    /**
-     * @see Operation#ignoreJsonView()
-     */
-    @AliasFor(annotation = Operation.class, attribute = "ignoreJsonView")
-    boolean ignoreJsonView() default false;
+    SecurityRequirement[] security() default {
+            @SecurityRequirement(name = "AUTHORIZATION")
+    };
 }

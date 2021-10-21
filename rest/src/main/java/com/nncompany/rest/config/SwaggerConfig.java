@@ -12,6 +12,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SwaggerConfig {
 
+    @Value("${jwt.headerName}")
+    private String headerName;
+
     @Bean
     public OpenAPI customOpenAPI(@Value("${spring.application.name}") String appName,
                                  @Value("${app.version}") String appVersion) {
@@ -28,9 +31,11 @@ public class SwaggerConfig {
                                                 .url("https://springdoc.org/#springdoc-openapi-core-properties")))
                 .components(
                         new Components()
-                        .addSecuritySchemes("bearer-key",
+                        .addSecuritySchemes("AUTHORIZATION",
                                 new SecurityScheme()
-                                        .type(SecurityScheme.Type.HTTP)
+                                        .type(SecurityScheme.Type.APIKEY)
+                                        .in(SecurityScheme.In.HEADER)
+                                        .name(headerName)
                                         .scheme("bearer")
                                         .description("Enter JWT Auth-Token **_only_**")
                                         .bearerFormat("JWT")));

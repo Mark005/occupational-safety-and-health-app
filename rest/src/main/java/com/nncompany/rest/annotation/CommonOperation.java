@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
@@ -41,4 +42,11 @@ public @interface CommonOperation {
     @AliasFor(annotation = Operation.class, attribute = "summary")
     String value() default "";
 
+    /**
+     * @see Operation#security()
+     */
+    @AliasFor(annotation = Operation.class, attribute = "security")
+    SecurityRequirement[] security() default {
+            @SecurityRequirement(name = "AUTHORIZATION")
+    };
 }
