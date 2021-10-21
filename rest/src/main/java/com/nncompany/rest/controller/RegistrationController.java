@@ -1,15 +1,17 @@
 package com.nncompany.rest.controller;
 
+import com.nncompany.api.dto.RequestError;
 import com.nncompany.api.dto.user.CheckLoginDto;
 import com.nncompany.api.dto.user.UserRegistrationDto;
 import com.nncompany.api.interfaces.services.UserCredentialsService;
 import com.nncompany.api.interfaces.services.UserService;
 import com.nncompany.api.model.entities.User;
 import com.nncompany.api.model.wrappers.BooleanResponse;
-import com.nncompany.api.dto.RequestError;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +31,12 @@ public class RegistrationController {
     @Autowired
     private UserService userService;
 
-    @ApiOperation(value = "Check if the login is already exist")
+    @Operation(summary = "Check if the login is already exist")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Received response in json", response = BooleanResponse.class),
-            @ApiResponse(code = 400, message = "Invalid request", response = RequestError.class)
+            @ApiResponse(responseCode = "200", description = "Successful check result",
+                    content = @Content(schema = @Schema(implementation = BooleanResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request",
+                    content = @Content(schema = @Schema(implementation = RequestError.class)))
     })
     @PostMapping("/checkLogin")
     public ResponseEntity<BooleanResponse> login(@RequestBody CheckLoginDto loginDto) {
@@ -41,12 +45,16 @@ public class RegistrationController {
                         userCredentialsService.checkLogin(loginDto.getLogin())));
     }
 
-    @ApiOperation(value = "Registration new user")
+    @Operation(summary = "Registration new user")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "New user registered successfully", response = User.class),
-            @ApiResponse(code = 400, message = "Invalid input json (check models for more info), " +
-                                               "or current login is already exist", response = RequestError.class),
-            @ApiResponse(code = 409, message = "New user registered successfully", response = RequestError.class)
+            @ApiResponse(responseCode = "201", description = "New user registered successfully",
+                    content = @Content(schema = @Schema(implementation = User.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request",
+                    content = @Content(schema = @Schema(implementation = RequestError.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(implementation = RequestError.class))),
+            @ApiResponse(responseCode = "409", description = "Login is already exist",
+                    content = @Content(schema = @Schema(implementation = RequestError.class)))
     })
     @PostMapping("/user")
     public ResponseEntity<User> registration(@RequestBody UserRegistrationDto requestUserCredentials) {

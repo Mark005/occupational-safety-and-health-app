@@ -5,11 +5,10 @@ import com.nncompany.api.dto.message.MessageTextUpdateDto;
 import com.nncompany.api.interfaces.services.MessageService;
 import com.nncompany.api.interfaces.services.UserService;
 import com.nncompany.api.model.entities.Message;
-import com.nncompany.api.dto.RequestError;
 import com.nncompany.api.model.wrappers.ResponseList;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import com.nncompany.rest.annotation.CommonOperation;
+import com.nncompany.rest.annotation.OperationCreate;
+import com.nncompany.rest.annotation.OperationDelete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -26,12 +25,7 @@ public class DialogController {
     @Autowired
     UserService userService;
 
-    @ApiOperation(value = "Get dialog with user by 'userId' with pagination")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Dialog received successfully", response = ResponseList.class),
-            @ApiResponse(code = 400, message = "Invalid path variable or query params", response = RequestError.class),
-            @ApiResponse(code = 404, message = "Target user not found", response = RequestError.class),
-    })
+    @CommonOperation("Get dialog with user by 'userId' with pagination")
     @GetMapping("/dialog/{userId}")
     public ResponseEntity<Object> getDialogWithUser(@PathVariable Integer userId,
                                                     @RequestParam Integer page,
@@ -44,24 +38,13 @@ public class DialogController {
                         dialogWithUserPage.getTotalElements()));
     }
 
-    @ApiOperation(value = "Get message by id from dialog with user")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Dialog received successfully", response = Message.class),
-            @ApiResponse(code = 400, message = "Invalid path variable", response = RequestError.class),
-            @ApiResponse(code = 403, message = "Current message from another dialog", response = RequestError.class),
-            @ApiResponse(code = 404, message = "Target user or message not found", response = RequestError.class),
-    })
+    @CommonOperation("Get message by id from dialog with user")
     @GetMapping("/dialog/{messageId}")
     public ResponseEntity<Object> getMessageFromDialogWithUser(@PathVariable Integer messageId) {
         return ResponseEntity.ok(messageService.getDialogMessageById(messageId));
     }
 
-    @ApiOperation(value = "Send message to user")
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Message sent successfully", response = Message.class),
-            @ApiResponse(code = 400, message = "Invalid path variable", response = RequestError.class),
-            @ApiResponse(code = 404, message = "Target user not found", response = RequestError.class),
-    })
+    @OperationCreate("Send message to user")
     @PostMapping("/dialog/{userId}")
     public ResponseEntity<Message> sendDialogMessage(@PathVariable Integer userId,
                                                      @RequestBody DialogMessageCreateDto messageDto) {
@@ -69,13 +52,8 @@ public class DialogController {
         return new ResponseEntity<>(messageService.saveDialogMessage(messageDto), HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "Change message's text by message id from dialog with user(Attention: user can change only his message and only message's text)")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Message text changed successfully", response = Message.class),
-            @ApiResponse(code = 400, message = "Invalid path variable", response = RequestError.class),
-            @ApiResponse(code = 403, message = "Current message from another dialog, or you are not creator", response = RequestError.class),
-            @ApiResponse(code = 404, message = "Target message not found", response = RequestError.class),
-    })
+    @CommonOperation("Change message's text by message id " +
+            "(Attention: user can change only his message and only message's text)")
     @PatchMapping("/dialog/{messageId}")
     public ResponseEntity<Message> changeDialogsMessage(@PathVariable Integer messageId,
                                                         @RequestBody MessageTextUpdateDto messageDto) {
@@ -83,13 +61,7 @@ public class DialogController {
         return new ResponseEntity<>(messageService.updateMessageText(messageDto), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Delete message by message id from dialog with user(Attention: user can delete only his message)")
-    @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Message deleted successfully"),
-            @ApiResponse(code = 400, message = "Invalid path variable", response = RequestError.class),
-            @ApiResponse(code = 403, message = "Current message from another dialog", response = RequestError.class),
-            @ApiResponse(code = 404, message = "Target message not found", response = RequestError.class),
-    })
+    @OperationDelete("Delete message by message id from dialog with user(Attention: user can delete only his message)")
     @DeleteMapping("/dialog/{messageId}")
     public ResponseEntity<Void> deleteDialogsMessage(@PathVariable Integer messageId) {
         messageService.deleteById(messageId);
