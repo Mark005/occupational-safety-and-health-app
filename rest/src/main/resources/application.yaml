@@ -42,16 +42,10 @@ springdoc:
 jwt:
   headerName: Auth-Token
   expirationHours: 1
-#
-#springdoc:
-#  api-docs:
-#    enabled:
 
 logging:
   level:
     org.springframework: ${SPRING_LOG_LEVEL:ERROR}
-    com.netflix: ${NETFLIX_LOG_LEVEL:ERROR}
-    eu.senla: ${LOG_LEVEL:TRACE}
   pattern:
     console: "%d{HH:mm:ss.SSS} [%t] %-5level %logger - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger - %msg%n"

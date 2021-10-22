@@ -16,7 +16,7 @@ services:
     container_name: test_postgres_db
     image: postgres:12-alpine
     ports:
-      - "5444:5333"
+      - "5555:5333"
     volumes:
       - ./database/postgres-volume:/var/lib/postgresql/data/
     env_file:
