@@ -5,20 +5,9 @@ spring:
   application:
     name: occupational-safety-and-health-app
   profiles:
-    active: "@profileActive@"
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: ${DB_URL:jdbc:postgresql://test_postgres_db:5333/postgres}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: validate
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    properties:
-      hibernate:
-        format_sql: true
+    active:
+      - "@generationStrategyProfile@"
+      - "@startMode@"
 
 app:
   version: 0.0.1
@@ -45,7 +34,7 @@ jwt:
 
 logging:
   level:
-    org.springframework: ${SPRING_LOG_LEVEL:ERROR}
+    org.springframework: info
   pattern:
     console: "%d{HH:mm:ss.SSS} [%t] %-5level %logger - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger - %msg%n"
